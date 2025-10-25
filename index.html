@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Wardrobe — Your AI Stylist</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+  <style>
+    :root {
+      --primary: #7c4dff;
+      --primary-light: #9a6aff;
+      --accent: #ff6b6b;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --text: #2d3748;
+      --text-light: #718096;
+      --border: #edf2f7;
+      --sunny: #5fbcd3;
+      --cloudy: #8a94a6;
+      --snowy: #bfc7cf;
+      --rainy: #555a62;
+      --casual: #b7c45f;
+      --work: #a88e6b;
+      --party: #d35ab3;
+      --formal: #2c3e50;
+      --calendar-bg: #f8f9fa;
+      --calendar-day: #ffffff;
+      --calendar-selected: #e74c3c;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 2rem;
+    }
+    header {
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      padding: 1.1rem 1.2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--text-light);
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 0.45rem 0.8rem;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+    nav a:hover, nav a.active {
+      color: var(--primary);
+      background: rgba(124, 77, 255, 0.06);
+    }
+    main {
+      max-width: 1200px;
+      margin: 1.8rem auto;
+      padding: 0 1.4rem;
+    }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+      animation: fadeInUp 0.4s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 1.8rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.03);
+      border: 1px solid var(--border);
+    }
+    h1, h2, h3 {
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+    }
+    p {
+      margin-bottom: 1.1rem;
+      color: var(--text-light);
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-card {
+      background: #f0f4ff;
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      font-weight: 500;
+    }
+    .btn-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary-light);
+    }
+    .btn-card.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .btn-card.sunny { background: var(--sunny); color: white; }
+    .btn-card.cloudy { background: var(--cloudy); color: white; }
+    .btn-card.snowy { background: var(--snowy); color: white; }
+    .btn-card.rainy { background: var(--rainy); color: white; }
+    .btn-card.casual { background: var(--casual); color: white; }
+    .btn-card.work { background: var(--work); color: white; }
+    .btn-card.party { background: var(--party); color: white; }
+    .btn-card.formal { background: var(--formal); color: white; }
+
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+    }
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-top: 0.4rem;
+    }
+    button:hover {
+      background: #6a4bd2;
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #f8f9ff;
+      transform: none;
+    }
+    .pattern-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 0.5rem;
+    }
+    .pattern-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .pattern-option input {
+      width: auto;
+      margin: 0;
+    }
+    .tag {
+      background: #f0f4ff;
+      color: var(--primary);
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+    .wardrobe-item, .schedule-item, .service-card, .post {
+      padding: 1.1rem;
+      background: #fafbff;
+      border-radius: 16px;
+      margin: 0.9rem 0;
+      border-left: 3px solid var(--primary);
+    }
+    .scan-btn {
+      background: #fff;
+      border: 2px dashed #ccc;
+      color: var(--text-light);
+      font-size: 1rem;
+      padding: 1.2rem;
+      text-align: center;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .scan-btn:hover {
+      background: #f8f8f8;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .scan-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+      margin-bottom: 0.5rem;
+    }
+    .camera-preview {
+      width: 100%;
+      max-height: 300px;
+      margin: 1rem 0;
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .camera-preview video {
+      width: 100%;
+      height: auto;
+    }
+    .scanned-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem;
+      background: #f0f4ff;
+      border-radius: 12px;
+      margin: 0.6rem 0;
+    }
+    .scanned-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .calendar-container {
+      background: var(--calendar-bg);
+      border-radius: 16px;
+      padding: 1rem;
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .calendar-month {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .calendar-nav button {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      padding: 0.2rem 0.4rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    .calendar-nav button:hover {
+      color: var(--primary);
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .calendar-day {
+      background: var(--calendar-day);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .calendar-day:hover {
+      background: #eef2ff;
+    }
+    .calendar-day.selected {
+      background: var(--calendar-selected);
+      color: white;
+      border-color: var(--calendar-selected);
+    }
+    .calendar-day.today {
+      border: 2px solid var(--primary);
+    }
+    .calendar-day.disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+    .outfit-plan {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f0f4ff;
+      border-radius: 12px;
+    }
+    .save-to-wardrobe {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .community-post {
+      background: #fffdf7;
+      padding: 1.2rem;
+      border-radius: 12px;
+      margin-bottom: 1.2rem;
+      border-left: 4px solid #ffa726;
+    }
+    .post-date {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+    footer {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      padding: 0 1.4rem;
+    }
+
+    /* Sign In Page */
+    .auth-container {
+      max-width: 450px;
+      margin: 3rem auto;
+      text-align: center;
+    }
+    .auth-logo {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2rem;
+    }
+    .auth-card {
+      background: white;
+      padding: 2.2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      margin: 1.2rem 0;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .auth-divider span {
+      padding: 0 1rem;
+      color: var(--text-light);
+    }
+
+    /* Schedule Layout */
+    .schedule-layout {
+      display: flex;
+      gap: 1.8rem;
+    }
+    .schedule-left, .schedule-right {
+      flex: 1;
+    }
+    @media (max-width: 900px) {
+      .schedule-layout {
+        flex-direction: column;
+      }
+      .card { padding: 1.4rem; }
+      h2 { font-size: 1.35rem; }
+      nav a { font-size: 0.85rem; padding: 0.4rem 0.7rem; }
+      .btn-grid { grid-template-columns: repeat(2, 1fr); }
+      .save-to-wardrobe { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-dot"></div>
+    Smart Wardrobe
+  </div>
+  <nav>
+    <a href="#" class="nav-link" data-page="outfit">Outfit Generator</a>
+    <a href="#" class="nav-link" data-page="wardrobe">Virtual Wardrobe</a>
+    <a href="#" class="nav-link" data-page="schedule">Schedule</a>
+    <a href="#" class="nav-link" data-page="services">Services</a>
+    <a href="#" class="nav-link" data-page="community">Community</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Sign In Page (NEW LANDING PAGE) -->
+  <section id="signin" class="page active">
+    <div class="auth-container">
+      <div class="auth-logo">Smart Wardrobe</div>
+      <div class="auth-card">
+        <h2>Welcome back</h2>
+        <p>Sign in to access your personalized wardrobe and outfit planner.</p>
+        
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••">
+        </div>
+        
+        <button onclick="signIn()">Sign In</button>
+        
+        <div class="auth-divider">
+          <span>or</span>
+        </div>
+        
+        <button class="btn-secondary" onclick="showPage('outfit')">Continue as Guest</button>
+        
+        <p style="margin-top: 1.2rem; font-size: 0.9rem; color: var(--text-light);">
+          Don’t have an account? <a href="#" onclick="showPage('outfit')" style="color:var(--primary); text-decoration:underline;">Try it free</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Outfit Generator -->
+  <section id="outfit" class="page">
+    <div class="card">
+      <h2> Outfit Generator</h2>
+      <p>Let’s find your perfect look — personalized to your body and style.</p>
+      
+      <div class="input-group">
+        <label for="heightInput">Height (cm)</label>
+        <input type="number" id="heightInput" min="100" max="250" placeholder="e.g., 168">
+      </div>
+      
+      <div class="input-group">
+        <label for="weightInput">Weight (kg)</label>
+        <input type="number" id="weightInput" min="30" max="200" placeholder="e.g., 62">
+      </div>
+      
+      <div class="section-title">Weather</div>
+      <div class="btn-grid">
+        <div class="btn-card sunny" onclick="selectWeather('sunny')">Sunny</div>
+        <div class="btn-card cloudy" onclick="selectWeather('cloudy')">Cloudy</div>
+        <div class="btn-card snowy" onclick="selectWeather('snowy')">Snowy</div>
+        <div class="btn-card rainy" onclick="selectWeather('rainy')">Rainy</div>
+      </div>
+      
+      <div class="section-title">Occasion</div>
+      <div class="btn-grid">
+        <div class="btn-card casual" onclick="selectOccasion('casual')">Casual</div>
+        <div class="btn-card work" onclick="selectOccasion('work')">Work</div>
+        <div class="btn-card party" onclick="selectOccasion('party')">Party</div>
+        <div class="btn-card formal" onclick="selectOccasion('formal')">Formal</div>
+      </div>
+      
+      <div class="section-title">Your style preferences</div>
+      <div class="input-group">
+        <label>Gender</label>
+        <div style="display:flex; gap:1rem; margin-top:0.5rem; flex-wrap:wrap;">
+          <label><input type="radio" name="gender" value="female" checked> Female</label>
+          <label><input type="radio" name="gender" value="male"> Male</label>
+          <label><input type="radio" name="gender" value="non-binary"> Non-binary</label>
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label>Pattern Preference</label>
+        <div class="pattern-selector">
+          <label class="pattern-option"><input type="checkbox" value="solid" checked> <span class="tag">Solid</span></label>
+          <label class="pattern-option"><input type="checkbox" value="stripes"> <span class="tag">Stripes</span></label>
+          <label class="pattern-option"><input type="checkbox" value="floral"> <span class="tag">Floral</span></label>
+          <label class="pattern-option"><input type="checkbox" value="checks"> <span class="tag">Checks</span></label>
+        </div>
+      </div>
+      
+      <button class="btn-secondary" onclick="generateOutfit()" style="margin-top: 1rem;">Get My Outfit Suggestion</button>
+      
+      <div id="outfitResult" style="margin-top: 1.4rem;"></div>
+    </div>
+  </section>
+
+  <!-- Virtual Wardrobe -->
+  <section id="wardrobe" class="page">
+    <div class="card">
+      <h2> Virtual Wardrobe</h2>
+      <p>Add your favorite pieces — manually or by scanning!</p>
+      
+      <div class="btn-grid" style="margin-bottom: 1.8rem;">
+        <div class="btn-card" onclick="toggleAddMode('manual')">
+          Add Manually
+        </div>
+        <div class="btn-card scan-btn" onclick="startCamera()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6-10H6v4l6 6 6-6V6z"/></svg>
+          Scan Item
+        </div>
+      </div>
+      
+      <div id="manualAddForm" style="display:none;">
+        <div class="input-group">
+          <label for="itemName">What’s the item called?</label>
+          <input type="text" id="itemName" placeholder="e.g., Denim jacket">
+        </div>
+        
+        <div class="input-group">
+          <label for="itemType">What kind of piece is it?</label>
+          <select id="itemType">
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="dress">Dress</option>
+            <option value="shoes">Shoes</option>
+            <option value="accessory">Accessory</option>
+          </select>
+        </div>
+        
+        <button onclick="addItem()">Add to my wardrobe</button>
+      </div>
+      
+      <div id="cameraPreview" class="camera-preview">
+        <video id="video" autoplay playsinline></video>
+        <button onclick="capturePhoto()" style="margin-top:0.5rem;">📸 Take Photo</button>
+      </div>
+      
+      <h3>Your Scanned Items</h3>
+      <div id="wardrobeList"></div>
+    </div>
+  </section>
+
+  <!-- Schedule -->
+  <section id="schedule" class="page">
+    <div class="card">
+      <h2> Plan Your Week</h2>
+      <p>Pick a date and choose what to wear from your own wardrobe!</p>
+      
+      <div class="schedule-layout">
+        <div class="schedule-left">
+          <div id="outfitPlan" class="outfit-plan">
+            <h3>Plan your look</h3>
+            <p>Select a date on the calendar to get started.</p>
+            <div id="wardrobeSelection" style="margin-top: 1.2rem; display: none;">
+              <!-- Will show tops, bottoms, etc. from user's wardrobe -->
+            </div>
+            
+            <div class="input-group" style="margin-top:1.2rem; display: none;" id="reminderSection">
+              <label>
+                <input type="checkbox" id="planReminder"> Send me a reminder on this day
+              </label>
+            </div>
+            
+            <button onclick="saveWardrobeOutfit()" style="margin-top:0.8rem; display: none;" id="savePlanBtn">Save This Outfit</button>
+          </div>
+        </div>
+        
+        <div class="schedule-right">
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button class="calendar-nav" onclick="changeMonth(-1)">←</button>
+              <div class="calendar-month" id="calendarMonth">October 2025</div>
+              <button class="calendar-nav" onclick="changeMonth(1)">→</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- Generated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 2rem;">Upcoming Plans</h3>
+      <div id="scheduleList"></div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="page">
+    <div class="card">
+      <h2> Thoughtful Services</h2>
+      <p>Because caring for your clothes—and the planet—matters.</p>
+      
+      <div class="service-card">
+        <h3> Clothing Donation</h3>
+        <p>Ready to let go of pieces you no longer wear? I’ll help you find a local donation center or schedule a pickup.</p>
+        <button class="btn-secondary" onclick="alert('Donation partners coming soon!')">Find a drop-off</button>
+      </div>
+      
+      <div class="service-card">
+        <h3> Laundry & Dry Cleaning</h3>
+        <p>Running low on clean favorites? Connect with trusted local cleaners for easy pickup and delivery.</p>
+        <button class="btn-secondary" onclick="alert('Laundry service integration in progress!')">Book a cleaning</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section id="community" class="page">
+    <div class="card">
+      <h2> From My Desk to Yours</h2>
+      <p>This is where I share what I’m building, learning, and dreaming up next. No corporate speak—just real talk.</p>
+      
+      <div class="community-post">
+        <div class="post-date" id="updateTime">Loading...</div>
+        <p id="latestUpdate">Updating every hour... Check back soon for new tips, features, and outfit ideas!</p>
+      </div>
+      
+      <div class="community-post">
+        <div class="post-date">Oct 22, 2025</div>
+        <p><strong>Why pattern preferences matter:</strong> After talking to 30+ users, I realized “floral” means something different to everyone. Now, your style choices shape your suggestions.</p>
+      </div>
+      
+      <p style="margin-top: 1.2rem; font-style: italic; color: var(--text-light);">
+        Have an idea or feedback? I read every note. You’re why this exists.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with care for humans who love fashion but hate decision fatigue.<br>
+  © 2025 Smart Wardrobe — All your clothes. Zero stress.
+</footer>
+
+<script>
+  // Global state
+  let schedule = JSON.parse(localStorage.getItem('schedule')) || [];
+  let wardrobe = JSON.parse(localStorage.getItem('wardrobe')) || [];
+  let selectedWeather = '';
+  let selectedOccasion = '';
+  let currentMonth = new Date();
+  let selectedDate = null;
+  let selectedTop = null;
+  let selectedBottom = null;
+  let selectedShoes = null;
+  let selectedDress = null;
+  let currentGeneratedOutfit = null;
+
+  // Navigation
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.dataset.page;
+      showPage(page);
+    });
+  });
+
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    updateActiveNav(pageId);
+    if (pageId === 'wardrobe') renderWardrobe();
+    if (pageId === 'schedule') {
+      renderCalendar();
+      renderSchedule();
+    }
+    if (pageId === 'community') loadCommunityUpdates();
+  }
+
+  function updateActiveNav(activePage) {
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.toggle('active', link.dataset.page === activePage);
+    });
+  }
+
+  function signIn() {
+    alert("Demo sign-in successful! 🎉\n(In a real app, you'd be logged in.)");
+    showPage('outfit');
+  }
+
+  // === OUTFIT GENERATOR ===
+  const outfitLibrary = {
+    female: {
+      sunny: {
+        casual: [
+          { top: "Linen button-down shirt", bottom: "High-waisted denim shorts", shoes: "Espadrille sandals", notes: "Light and breezy for warm days." },
+          { top: "Floral wrap top", bottom: "White wide-leg pants", shoes: "Strappy flat sandals", notes: "Effortlessly chic for brunch or errands." }
+        ],
+        work: [
+          { top: "Silk blouse in soft peach", bottom: "Tailored beige trousers", shoes: "Nude block heels", notes: "Professional yet fresh for summer office days." }
+        ],
+        party: [
+          { dress: "Satin slip dress in coral", shoes: "Strappy metallic heels", notes: "Glow under the sun or moonlight." }
+        ],
+        formal: [
+          { dress: "Midi dress in ivory with subtle floral print", shoes: "Elegant nude pumps", notes: "Perfect for garden weddings or daytime events." }
+        ]
+      },
+      rainy: {
+        casual: [
+          { top: "Oversized striped sweater", bottom: "Black skinny jeans", shoes: "White sneakers", notes: "Cozy and dry for drizzly days." }
+        ],
+        work: [
+          { top: "Water-resistant trench coat over a turtleneck", bottom: "Dark tailored pants", shoes: "Chelsea boots", notes: "Stay polished even in the rain." }
+        ],
+        party: [
+          { dress: "Velvet wrap dress in deep red", shoes: "Knee-high boots", notes: "Rich texture that shines in moody weather." }
+        ]
+      },
+      snowy: {
+        casual: [
+          { top: "Chunky knit sweater", bottom: "Corduroy pants", shoes: "Fuzzy ankle boots", notes: "Warm, textured, and ready for snow." }
+        ],
+        work: [
+          { top: "Turtleneck + wool blazer", bottom: "Pleated midi skirt", shoes: "Knee-high boots", notes: "Sophisticated warmth for winter commutes." }
+        ],
+        formal: [
+          { dress: "Long-sleeve velvet gown in emerald", shoes: "Heeled booties", notes: "Regal and cozy for winter galas." }
+        ]
+      },
+      cloudy: {
+        casual: [
+          { top: "Relaxed-fit striped tee", bottom: "Mom jeans", shoes: "White canvas sneakers", notes: "Easygoing for overcast days." }
+        ],
+        work: [
+          { top: "Structured blouse in checks", bottom: "Pencil skirt", shoes: "Loafers", notes: "Sharp but comfortable for gray skies." }
+        ]
+      }
+    },
+    male: {
+      sunny: {
+        casual: [
+          { top: "Linen short-sleeve shirt", bottom: "Chino shorts", shoes: "Leather sandals", notes: "Cool and relaxed for hot days." }
+        ],
+        work: [
+          { top: "Light blue oxford shirt", bottom: "Khaki chinos", shoes: "Loafers", notes: "Smart-casual for summer Fridays." }
+        ],
+        party: [
+          { top: "Unbuttoned silk shirt", bottom: "Black tailored trousers", shoes: "Minimalist sneakers", notes: "Modern and confident for rooftop parties." }
+        ]
+      },
+      rainy: {
+        casual: [
+          { top: "Hooded sweatshirt", bottom: "Joggers", shoes: "Waterproof sneakers", notes: "Dry and comfy for wet weekends." }
+        ],
+        work: [
+          { top: "Waterproof jacket over a henley", bottom: "Dark jeans", shoes: "Chelsea boots", notes: "Practical but put-together." }
+        ]
+      }
+    },
+    nonBinary: {
+      sunny: {
+        casual: [
+          { top: "Oversized graphic tee", bottom: "Cargo pants", shoes: "Chunky sandals", notes: "Playful and gender-free for sunny vibes." },
+          { dress: "Gender-neutral tunic dress in stripes", shoes: "Slides", notes: "Flowy and cool for warm days." }
+        ]
+      },
+      work: {
+        casual: [
+          { top: "Structured blazer over a tank", bottom: "Wide-leg trousers", shoes: "Platform loafers", notes: "Bold and professional." }
+        ]
+      }
+    }
+  };
+
+  function getRandomSuggestion(gender, weather, occasion) {
+    const genderKey = gender in outfitLibrary ? gender : 'female';
+    const weatherKey = weather || 'sunny';
+    const occasionKey = occasion || 'casual';
+
+    const options = outfitLibrary[genderKey]?.[weatherKey]?.[occasionKey];
+    if (!options || options.length === 0) {
+      return {
+        top: "Classic white tee",
+        bottom: "Dark jeans",
+        shoes: "White sneakers",
+        notes: "A timeless combo that works almost anywhere."
+      };
+    }
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  function selectWeather(weather) {
+    selectedWeather = weather;
+    document.querySelectorAll('.btn-card.sunny, .btn-card.cloudy, .btn-card.snowy, .btn-card.rainy').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`.btn-card.${weather}`).classList.add('selected');
+  }
+
+  function selectOccasion(occasion) {
+    selectedOccasion = occasion;
+    document.querySelectorAll('.btn-card.casual, .btn-card.work, .btn-card.party, .btn-card.formal').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`.btn-card.${occasion}`).classList.add('selected');
+  }
+
+  function generateOutfit() {
+    const height = document.getElementById('heightInput').value;
+    const weight = document.getElementById('weightInput').value;
+    const genderEl = document.querySelector('input[name="gender"]:checked');
+    const gender = genderEl ? genderEl.value : 'female';
+    const patterns = Array.from(document.querySelectorAll('#outfit input[type="checkbox"]:checked')).map(cb => cb.value);
+
+    if (!height || !weight) {
+      document.getElementById('outfitResult').innerHTML = '<p style="color:#e53e3e">Please enter your height and weight for personalized suggestions.</p>';
+      return;
+    }
+
+    if (!selectedWeather || !selectedOccasion) {
+      document.getElementById('outfitResult').innerHTML = '<p style="color:#e53e3e">Please choose weather and occasion first!</p>';
+      return;
+    }
+
+    const suggestion = getRandomSuggestion(gender, selectedWeather, selectedOccasion);
+    const patternList = patterns.length ? patterns.join(', ') : 'classic styles';
+    currentGeneratedOutfit = suggestion;
+
+    let html = `<div class="wardrobe-item" style="border-left-color: var(--primary); background: #f0f4ff;">`;
+    html += `<h3>Your personalized look </h3>`;
+
+    if (suggestion.dress) {
+      html += `<p><strong>Dress:</strong> ${suggestion.dress}</p>`;
+    } else {
+      html += `<ul style="padding-left: 1.2rem; margin: 0.8rem 0;">`;
+      if (suggestion.top) html += `<li><strong>Top:</strong> ${suggestion.top}</li>`;
+      if (suggestion.bottom) html += `<li><strong>Bottom:</strong> ${suggestion.bottom}</li>`;
+      if (suggestion.shoes) html += `<li><strong>Shoes:</strong> ${suggestion.shoes}</li>`;
+      html += `</ul>`;
+    }
+
+    html += `<p><em>${suggestion.notes} Styled with your love of ${patternList}.</em></p>`;
+    
+    // Add Save buttons
+    html += `<div class="save-to-wardrobe">`;
+    if (suggestion.dress) {
+      html += `<button class="btn-secondary" onclick="saveGeneratedItem('dress', '${suggestion.dress}')">Save Dress</button>`;
+    } else {
+      html += `<button class="btn-secondary" onclick="saveGeneratedItem('top', '${suggestion.top}')">Save Top</button>`;
+      html += `<button class="btn-secondary" onclick="saveGeneratedItem('bottom', '${suggestion.bottom}')">Save Bottom</button>`;
+      html += `<button class="btn-secondary" onclick="saveGeneratedItem('shoes', '${suggestion.shoes}')">Save Shoes</button>`;
+    }
+    // NEW: Save All button
+    html += `<button class="btn-secondary" onclick="saveEntireOutfit()">Save All</button>`;
+    html += `</div>`;
+    
+    html += `</div>`;
+
+    document.getElementById('outfitResult').innerHTML = html;
+  }
+
+  function saveGeneratedItem(type, name) {
+    const newItem = {
+      name: name,
+      type: type,
+      image: "https://via.placeholder.com/60?text=AI+Suggestion",
+      id: Date.now()
+    };
+    wardrobe.push(newItem);
+    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
+  }
+
+  function saveEntireOutfit() {
+    const outfit = currentGeneratedOutfit;
+    if (!outfit) return;
+
+    let savedItems = [];
+    if (outfit.dress) {
+      savedItems.push({ type: 'dress', name: outfit.dress });
+    } else {
+      if (outfit.top) savedItems.push({ type: 'top', name: outfit.top });
+      if (outfit.bottom) savedItems.push({ type: 'bottom', name: outfit.bottom });
+      if (outfit.shoes) savedItems.push({ type: 'shoes', name: outfit.shoes });
+    }
+
+    savedItems.forEach(item => {
+      wardrobe.push({
+        name: item.name,
+        type: item.type,
+        image: "https://via.placeholder.com/60?text=AI+Suggestion",
+        id: Date.now() + Math.random()
+      });
+    });
+
+    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
+    renderWardrobe();
+    alert(`${savedItems.length} item(s) saved to your Virtual Wardrobe!`);
+  }
+
+  // === VIRTUAL WARDROBE ===
+  function toggleAddMode(mode) {
+    const form = document.getElementById('manualAddForm');
+    const preview = document.getElementById('cameraPreview');
+    form.style.display = mode === 'manual' ? 'block' : 'none';
+    preview.style.display = mode === 'scan' ? 'block' : 'none';
+  }
+
+  async function startCamera() {
+    const video = document.getElementById('video');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      toggleAddMode('scan');
+    } catch (err) {
+      alert('Camera access denied or not available. Please allow camera permission.');
+      console.error("Camera error:", err);
+    }
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const photoData = canvas.toDataURL('image/png');
+    const itemName = prompt("What's the name of this item?", "Scanned Item");
+    if (!itemName) return;
+
+    const newItem = {
+      name: itemName,
+      type: "top",
+      image: photoData,
+      id: Date.now()
+    };
+
+    wardrobe.push(newItem);
+    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
+
+    const stream = video.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach(track => track.stop());
+
+    document.getElementById('cameraPreview').style.display = 'none';
+    renderWardrobe();
+  }
+
+  function addItem() {
+    const name = document.getElementById('itemName').value.trim();
+    const type = document.getElementById('itemType').value;
+    if (!name) return alert('Please name your item.');
+
+    const newItem = {
+      name,
+      type,
+      image: "https://via.placeholder.com/60?text=No+Image",
+      id: Date.now()
+    };
+
+    wardrobe.push(newItem);
+    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
+    document.getElementById('itemName').value = '';
+    renderWardrobe();
+  }
+
+  function renderWardrobe() {
+    const list = document.getElementById('wardrobeList');
+    list.innerHTML = wardrobe.length ? 
+      wardrobe.map(item => `
+        <div class="scanned-item">
+          <img src="${item.image}" alt="${item.name}">
+          <div>
+            <strong>${item.name}</strong><br>
+            <em>${item.type}</em>
+          </div>
+        </div>
+      `).join('')
+      : '<p class="text-light">Your wardrobe is empty. Add your first piece!</p>';
+  }
+
+  // === SCHEDULE ===
+  function renderCalendar() {
+    const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    document.getElementById('calendarMonth').textContent = monthName;
+
+    const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+    const today = new Date();
+
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < startingDay; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day disabled';
+      grid.appendChild(cell);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day';
+      cell.textContent = day;
+
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      if (date.toDateString() === today.toDateString()) {
+        cell.classList.add('today');
+      }
+
+      cell.onclick = () => selectDate(date);
+      grid.appendChild(cell);
+    }
+
+    const endDay = lastDay.getDay();
+    for (let i = endDay + 1; i < 7; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day disabled';
+      grid.appendChild(cell);
+    }
+  }
+
+  function changeMonth(direction) {
+    currentMonth.setMonth(currentMonth.getMonth() + direction);
+    renderCalendar();
+  }
+
+  function selectDate(date) {
+    selectedDate = date;
+    selectedTop = null;
+    selectedBottom = null;
+    selectedShoes = null;
+    selectedDress = null;
+
+    document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+    const dayCells = document.querySelectorAll('.calendar-day');
+    const targetDay = Array.from(dayCells).find(el => {
+      const day = parseInt(el.textContent);
+      return day === date.getDate();
+    });
+    if (targetDay) targetDay.classList.add('selected');
+
+    // Show planning UI
+    document.getElementById('outfitPlan').querySelector('h3').textContent = `Plan your look for ${date.toLocaleDateString()}`;
+    document.getElementById('wardrobeSelection').style.display = 'block';
+    document.getElementById('reminderSection').style.display = 'block';
+    document.getElementById('savePlanBtn').style.display = 'block';
+    renderWardrobeSelection();
+  }
+
+  function renderWardrobeSelection() {
+    const container = document.getElementById('wardrobeSelection');
+    
+    if (wardrobe.length === 0) {
+      container.innerHTML = `
+        <p style="color:#e53e3e; text-align:center;">
+          Your wardrobe is empty!<br>
+          Go to <strong>Virtual Wardrobe</strong> to add or scan items first.
+        </p>
+      `;
+      return;
+    }
+
+    const tops = wardrobe.filter(item => item.type === 'top');
+    const bottoms = wardrobe.filter(item => item.type === 'bottom');
+    const shoes = wardrobe.filter(item => item.type === 'shoes');
+    const dresses = wardrobe.filter(item => item.type === 'dress');
+
+    let html = '';
+
+    if (dresses.length > 0) {
+      html += `<h4 style="margin:1rem 0 0.6rem;">Dresses</h4>`;
+      html += `<div class="btn-grid">`;
+      dresses.forEach(item => {
+        const isSelected = selectedDress && selectedDress.id === item.id;
+        html += `
+          <div class="btn-card" style="background:${isSelected ? '#7c4dff' : '#f0f4ff'}; color:${isSelected ? 'white' : '#2d3748'};" 
+               onclick="selectDress(${item.id})">
+            <img src="${item.image}" alt="${item.name}" style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            ${item.name}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    if (tops.length > 0) {
+      html += `<h4 style="margin:1.2rem 0 0.6rem;">Tops</h4>`;
+      html += `<div class="btn-grid">`;
+      tops.forEach(item => {
+        const isSelected = selectedTop && selectedTop.id === item.id;
+        html += `
+          <div class="btn-card" style="background:${isSelected ? '#7c4dff' : '#f0f4ff'}; color:${isSelected ? 'white' : '#2d3748'};" 
+               onclick="selectTop(${item.id})">
+            <img src="${item.image}" alt="${item.name}" style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            ${item.name}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    if (bottoms.length > 0) {
+      html += `<h4 style="margin:1.2rem 0 0.6rem;">Bottoms</h4>`;
+      html += `<div class="btn-grid">`;
+      bottoms.forEach(item => {
+        const isSelected = selectedBottom && selectedBottom.id === item.id;
+        html += `
+          <div class="btn-card" style="background:${isSelected ? '#7c4dff' : '#f0f4ff'}; color:${isSelected ? 'white' : '#2d3748'};" 
+               onclick="selectBottom(${item.id})">
+            <img src="${item.image}" alt="${item.name}" style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            ${item.name}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    if (shoes.length > 0) {
+      html += `<h4 style="margin:1.2rem 0 0.6rem;">Shoes</h4>`;
+      html += `<div class="btn-grid">`;
+      shoes.forEach(item => {
+        const isSelected = selectedShoes && selectedShoes.id === item.id;
+        html += `
+          <div class="btn-card" style="background:${isSelected ? '#7c4dff' : '#f0f4ff'}; color:${isSelected ? 'white' : '#2d3748'};" 
+               onclick="selectShoes(${item.id})">
+            <img src="${item.image}" alt="${item.name}" style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            ${item.name}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function selectTop(id) {
+    selectedTop = wardrobe.find(item => item.id === id);
+    selectedDress = null;
+    renderWardrobeSelection();
+  }
+
+  function selectBottom(id) {
+    selectedBottom = wardrobe.find(item => item.id === id);
+    renderWardrobeSelection();
+  }
+
+  function selectShoes(id) {
+    selectedShoes = wardrobe.find(item => item.id === id);
+    renderWardrobeSelection();
+  }
+
+  function selectDress(id) {
+    selectedDress = wardrobe.find(item => item.id === id);
+    selectedTop = null;
+    selectedBottom = null;
+    renderWardrobeSelection();
+  }
+
+  function saveWardrobeOutfit() {
+    if (!selectedDate) return;
+
+    let outfitText = "";
+    if (selectedDress) {
+      outfitText = `Dress: ${selectedDress.name}`;
+    } else if (selectedTop && selectedBottom && selectedShoes) {
+      outfitText = `Top: ${selectedTop.name} • Bottom: ${selectedBottom.name} • Shoes: ${selectedShoes.name}`;
+    } else {
+      alert("Please select a complete outfit:\n- Either a dress,\n- Or a top, bottom, and shoes.");
+      return;
+    }
+
+    const reminder = document.getElementById('planReminder').checked;
+    const dateString = selectedDate.toISOString().split('T')[0];
+
+    const existingIndex = schedule.findIndex(s => s.date === dateString);
+    if (existingIndex !== -1) {
+      schedule[existingIndex] = { date: dateString, outfit: outfitText, reminder, id: Date.now() };
+    } else {
+      schedule.push({ date: dateString, outfit: outfitText, reminder, id: Date.now() });
+    }
+
+    localStorage.setItem('schedule', JSON.stringify(schedule));
+    renderSchedule();
+    document.getElementById('planReminder').checked = false;
+    // Keep UI visible for now
+    alert("Outfit saved to your schedule!");
+  }
+
+  function renderSchedule() {
+    const list = document.getElementById('scheduleList');
+    const today = new Date();
+    const sorted = [...schedule].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const upcoming = sorted.filter(s => new Date(s.date) >= today);
+    
+    list.innerHTML = upcoming.length ?
+      upcoming.map(item => `
+        <div class="schedule-item">
+          <div class="schedule-info">
+            <strong>${formatDate(item.date)}</strong><br>
+            ${item.outfit}
+          </div>
+          ${item.reminder ? '<span style="background:#ff6b6b;color:white;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:12px;font-weight:600;">🔔 Reminder</span>' : ''}
+        </div>
+      `).join('') : '<p>No outfits scheduled yet. Plan your week ahead!</p>';
+  }
+
+  function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  // === COMMUNITY ===
+  function loadCommunityUpdates() {
+    const now = new Date();
+    const lastUpdate = localStorage.getItem('lastCommunityUpdate');
+    const oneHour = 60 * 60 * 1000;
+
+    if (!lastUpdate || now.getTime() - parseInt(lastUpdate) > oneHour) {
+      const updates = [
+        "Just added camera scanning for your wardrobe! Try it out ",
+        "New feature: Interactive calendar for outfit planning ",
+        "Updated outfit suggestions based on user feedback — more patterns & occasions!",
+        "Added live community updates — check back every hour for new tips!"
+      ];
+      const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+
+      document.getElementById('latestUpdate').textContent = randomUpdate;
+      document.getElementById('updateTime').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+      localStorage.setItem('lastCommunityUpdate', now.getTime().toString());
+      localStorage.setItem('communityUpdate', randomUpdate);
+      localStorage.setItem('communityUpdateTime', now.toLocaleTimeString());
+    } else {
+      const cachedUpdate = localStorage.getItem('communityUpdate') || "Welcome to the community!";
+      const cachedTime = localStorage.getItem('communityUpdateTime') || now.toLocaleTimeString();
+      document.getElementById('latestUpdate').textContent = cachedUpdate;
+      document.getElementById('updateTime').textContent = `Last updated: ${cachedTime}`;
+    }
+  }
+
+  // Init
+  renderWardrobe();
+  renderSchedule();
+  loadCommunityUpdates();
+</script>
+
+</body>
+</html>
